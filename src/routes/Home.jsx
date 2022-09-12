@@ -1,18 +1,31 @@
-
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useFirestore } from "../hooks/useFirestore";
 import { errorFirebase } from "../utils/errorFirebase"
+import { formValidate } from "../utils/formValidate";
+import { useForm } from "react-hook-form";
 
 import Button from "../components/Button";
-import Perfil from "./Perfil";
 import Title from "../components/Title";
+import FormInput from "../components/FormInput";
+import FormError from "../components/FormError";
+
 
 const Home = () => {
     
+    const {patternURL, required} = formValidate()
+
     const {data, error, loading, getDat, addData,deleteData, updateData} = useFirestore()
-    const [text, setText] = useState('')
     const [newOriginID, setNewOriginID] = useState();
+    const [copy, setCopy] = useState({ propiedadX: true });
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        resetField,
+        setError,
+        setValue,
+    } = useForm();
 
     useEffect(() => {
         getDat()
@@ -27,7 +40,7 @@ const Home = () => {
 
     const pathURL = window.location.href;
 
-    const handleSubmit = async ({ url }) => {
+    const onSubmit = async ({ url }) => {
         try {
             if (newOriginID) {
                 await updateData(newOriginID, url);
@@ -50,6 +63,12 @@ const Home = () => {
         setValue("url", item.origin);
         setNewOriginID(item.nanoid);
     };
+
+    const handleClickCopy = async (nanoid) => {
+        await navigator.clipboard.writeText(window.location.href + nanoid);
+        console.log("copiado");
+        setCopy({ [nanoid]: true });
+    };
     
 
     return (
@@ -57,13 +76,21 @@ const Home = () => {
 
             <Title text='HOME'/>
 
-            <form type="text" onSubmit={handleSubmit}>
-                <input className="border-2 m-2"
-                    type="text" 
-                    placeholder="insert text" 
-                    value={text} 
-                    onChange={(e) => setText(e.target.value)} 
-                />
+            <form  onSubmit={handleSubmit(onSubmit)}className="rounded-lg border">
+            <FormInput
+                    label="Ingresa tu URL"
+                    type="text"
+                    placeholder=" youtube.com "
+                    {...register("url", {
+                        required,
+                        pattern: patternURL,
+                    })}
+                    error={errors.url}
+                >
+                    <FormError error={errors.url} />
+                </FormInput>
+
+                
                 {newOriginID ? (
                     <Button
                         type="submit"
@@ -85,10 +112,10 @@ const Home = () => {
                 data.map (item => (
                     <div
                     key={item.nanoid}
-                    className="p-6 bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700 mb-2"
+                    className="p-6 bg-white rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700 mb-2 mt-4"
                 >
                     <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        {pathURL}
+                        
                         {item.nanoid}
                     </h5>
                     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
@@ -108,11 +135,17 @@ const Home = () => {
                             color="yellow"
                             onClick={() => handleClickEdit(item)}
                         />
+                        <Button
+                            type ="button"
+                            text={copy[item.nanoid] ? "Copied" : "Copy"}
+                            color="purple"
+                            onClick={() =>handleClickCopy(item.nanoid)}
+                        >
+                        </Button>
                     </div>
                 </div>
                 ))
             }
-            <Perfil></Perfil>
         </>
     );
 };

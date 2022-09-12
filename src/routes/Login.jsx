@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import FormError from "../components/FormError";
 import FormInput from "../components/FormInput";
 import Button from "../components/Button";
-import ButtonLoading from '../components/ButtonLoading'
 
 const Login = () => {
     const { loginUser } = useContext(UserContext);
@@ -66,13 +65,13 @@ return (
             >
                 <FormError error={errors.password} />
             </FormInput>
-            {
-                loading ? 
-                <ButtonLoading></ButtonLoading>
-                :
-                <Button text="Login" type="submit" />
-
-            }   
+            <Button 
+                text="Login"
+                type="submit"
+                loading = {loading}
+                color = "purple"
+            >
+            </Button>  
         </form>
     </>
   );

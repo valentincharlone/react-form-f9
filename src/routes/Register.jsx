@@ -82,12 +82,13 @@ const Register = () => {
                 >
                     <FormError error={errors.repassword} />
                 </FormInput>
-                {
-                    loading ? 
-                        <ButtonLoading></ButtonLoading>
-                    :
-                        <Button text="Register" type="submit" />
-                }
+                <Button
+                    type="submit"
+                    text="Register"
+                    color= "purple"
+                    loading = {loading}
+                >
+                </Button>
             </form>
         </>
     );
