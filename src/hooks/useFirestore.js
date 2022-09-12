@@ -1,4 +1,4 @@
-import { collection, getDocs, query, setDoc, where, doc } from "firebase/firestore/lite"
+import { collection, getDocs, query, setDoc, where, doc, deleteDoc } from "firebase/firestore/lite"
 import { useState } from "react"
 import { db, auth } from "../firebase"
 import { nanoid } from "nanoid"
@@ -13,7 +13,7 @@ export const useFirestore = () => {
 
     const getDat = async () => {
         try {
-            setLoading((prev) => ({ ...prev, addData: true }));
+            setLoading((prev) => ({ ...prev, getData: true }));
             const dataRef = collection(db, 'urls')
             const q = query(dataRef, where ("uid", "==", auth.currentUser.uid))
             const querySnapshot = await getDocs(q)
@@ -24,7 +24,8 @@ export const useFirestore = () => {
             setError(error.message)
         }
         finally{
-            setLoading(false)
+            setLoading((prev) => ({ ...prev, getData: false }));
+
         }
     }
 
@@ -49,8 +50,41 @@ export const useFirestore = () => {
         }
     };
 
+    const deleteData = async (nanoid) => {
+        try {
+            setLoading((prev) => ({ ...prev, [nanoid]: true }));
+            const docRef = doc(db, "urls", nanoid);
+            await deleteDoc(docRef);
+            setData(data.filter((item) => item.nanoid !== nanoid));
+        } catch (error) {
+            console.log(error);
+            setError(error.message);
+        } finally {
+            setLoading((prev) => ({ ...prev, [nanoid]: false }));
+        }
+    };
+
+    const updateData = async (nanoid, newOrigin) => {
+        try {
+            setLoading((prev) => ({ ...prev, updateData: true }));
+            const docRef = doc(db, "urls", nanoid);
+            await updateDoc(docRef, { origin: newOrigin });
+            setData(
+                data.map((item) =>
+                    item.nanoid === nanoid
+                        ? { ...item, origin: newOrigin }
+                        : item
+                )
+            );
+        } catch (error) {
+            console.log(error);
+            setError(error.message);
+        } finally {
+            setLoading((prev) => ({ ...prev, updateData: false }));
+        }
+    };
  
     return (
-        {data, error, loading, getDat, addData}
+        {data, error, loading, getDat, addData, deleteData, updateData}
     )
 }
