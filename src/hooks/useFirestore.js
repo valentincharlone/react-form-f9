@@ -1,4 +1,14 @@
-import { collection, getDocs, query, setDoc, where, doc, deleteDoc, getDoc } from "firebase/firestore/lite"
+import {
+    collection,
+    deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    setDoc,
+    updateDoc,
+    where,
+} from "firebase/firestore/lite";
 import { useState } from "react"
 import { db, auth } from "../firebase"
 import { nanoid } from "nanoid"
@@ -24,7 +34,7 @@ export const useFirestore = () => {
             setError(error.message)
         }
         finally{
-            setLoading((prev) => ({ ...prev, getData: false }));
+            setLoading((prev) => ({ ...prev, getDat: false }));
 
         }
     }
